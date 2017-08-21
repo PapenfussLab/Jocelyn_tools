@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 trim_to_amplicon_primers.py -i <inputfastqFilename> -o <outputfastqFilename>
 
@@ -57,8 +58,8 @@ def trim_to_amplicons(in_name, out_name):
 	f533F = "GTG[CT]CAGC[AC]GCCGCGGTAA"
 	r533F = re.compile(rc(f533F), re.I)
 	bothfound = 0
-	pre_length = Counter()
-	post_length = Counter()
+	pre_length = Counter(); pre_trim =0
+	post_length = Counter(); post_trim = 0
 	out_fq = open(out_name, 'w')
 	
 	with open(in_name, 'r') as fastq:
@@ -81,8 +82,10 @@ def trim_to_amplicons(in_name, out_name):
 					post_length[tail] += 1
 				if pf_find and pr_find: 
 					bothfound += 1
-		pre_trim = pre_length.most_common(1)[0][0]
-		post_trim = post_length.most_common(1)[0][0]
+		if len(pre_length) > 0:
+			pre_trim = pre_length.most_common(1)[0][0]
+		if len(post_length) > 0:
+			post_trim = post_length.most_common(1)[0][0]
 		print "Forward primers found:", sum(pre_length.values()),"Counts of pre_length:", pre_length
 		print "Number of bases trimmed from sequence start when forward primer not found:", pre_trim
 		print "Reverse primers found:", sum(post_length.values()),"Counts of post_length", post_length
