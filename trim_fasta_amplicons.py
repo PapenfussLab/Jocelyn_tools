@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 trim_amplicon_primers.py -i <inputfastaFilename> -o <outputfastailename>
 
@@ -76,8 +77,8 @@ def trim_amplicons(in_name, out_name, **options_dict):
 			primer2 = re.compile(rc(f805R), re.I)
 	print 'primer1:', primer1.pattern, ', primer2:', primer2.pattern
 	bothfound = 0
-	pre_length = Counter()
-	post_length = Counter()
+	pre_length = Counter(); pre_trim = 0
+	post_length = Counter(); post_trim = 0
 	out_fa = open(out_name, 'w')
 	
 	with open(in_name, 'r') as fasta:
@@ -98,13 +99,15 @@ def trim_amplicons(in_name, out_name, **options_dict):
 					post_length[tail] += 1
 				if pf_find and pr_find: 
 					bothfound += 1
-		pre_trim = pre_length.most_common(1)[0][0]
-		post_trim = post_length.most_common(1)[0][0]
-		print "Forward primers found:", sum(pre_length.values()),"Counts of pre_length:", pre_length
-		print "Number of bases trimmed from sequence start when forward primer not found:", pre_trim
-		print "Reverse primers found:", sum(post_length.values()),"Counts of post_length", post_length
-		print "Number of bases trimmed from sequence end when reverse primer not found:", post_trim
-		print "Both primers found:", bothfound
+		if len(pre_length) > 0:
+			pre_trim = pre_length.most_common(1)[0][0]
+		if len(post_length) > 0:
+			post_trim = post_length.most_common(1)[0][0]
+		print ("Forward primers found:", sum(pre_length.values()),"Counts of pre_length:", pre_length)
+		print ("Number of bases trimmed from sequence start when forward primer not found:", pre_trim)
+		print ("Reverse primers found:", sum(post_length.values()),"Counts of post_length", post_length)
+		print ("Number of bases trimmed from sequence end when reverse primer not found:", post_trim)
+		print ("Both primers found:", bothfound)
 		
 	# Read through file again, trimming sequences 
 		fasta.seek(0)
@@ -135,7 +138,7 @@ def trim_amplicons(in_name, out_name, **options_dict):
 				out_fa.write(trimseq)
 				
 	out_fa.close()
-	print "Trimmed fasta records written to", out_name					
+	print ("Trimmed fasta records written to", out_name)					
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description=
