@@ -86,11 +86,11 @@ def trim_to_amplicons(in_name, out_name):
 			pre_trim = pre_length.most_common(1)[0][0]
 		if len(post_length) > 0:
 			post_trim = post_length.most_common(1)[0][0]
-		print "Forward primers found:", sum(pre_length.values()),"Counts of pre_length:", pre_length
-		print "Number of bases trimmed from sequence start when forward primer not found:", pre_trim
-		print "Reverse primers found:", sum(post_length.values()),"Counts of post_length", post_length
-		print "Number of bases trimmed from sequence end when reverse primer not found:", post_trim
-		print "Both primers found:", bothfound
+		print ("Forward primers found:", sum(pre_length.values()),"Counts of pre_length:", pre_length)
+		print ("Number of bases trimmed from sequence start when forward primer not found:", pre_trim)
+		print ("Reverse primers found:", sum(post_length.values()),"Counts of post_length", post_length)
+		print ("Number of bases trimmed from sequence end when reverse primer not found:", post_trim)
+		print ("Both primers found:", bothfound)
 		
 	# Read through file again, trimming sequence and quality lines 
 		fastq.seek(0)
@@ -127,7 +127,7 @@ def trim_to_amplicons(in_name, out_name):
 				out_fq.write(trimqual)
 				
 	out_fq.close()
-	print "Trimmed fastq records written to", out_name					
+	print ("Trimmed fastq records written to", out_name)					
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description=
