@@ -1,15 +1,17 @@
-## Pipeline for 16S microbiome analysis for mouse stool from Alan Yu
+## Pipeline for 16S microbiome analysis for mouse stool 
 ## Started August 2017 by Jocelyn Sietsma Penington
+## Modified to use de-noised sequences as OTUs, instead of clusters, Oct 2017
+## This is a record of steps, not actually run complete, which is why some steps have 
+## "nohup <command> &" 
+## If you were to want to run this entire, the '&' would need to be removed.
 
 ## Pipeline decisions: I'm not going to filter by alignment position using Mothur
-## I will cluster using UParse
-## CHANGE 30 Oct : I will not cluster, 
-## I will 'denoise' and use Amplicon Sequence Variants instead of 97% similar clusters
 ## I will assign taxonomy using Silva
+## Blend of QIIME (version 1.9.1), usearch (version 9.2) and vsearch. 
 
 ## Define some path shortcuts
 export PAPDIR=/wehisan/bioinf/bioinf-data/Papenfuss_lab/projects
-export BASEDIR=$PAPDIR/metagenomics/seth/AlanYu2017
+export BASEDIR=$PAPDIR/metagenomics/currentProject
 export DATADIR=$BASEDIR/sequence_data
 export OUT1DIR=$BASEDIR/01_processed_data
 export TOOLDIR=$BASEDIR/analysis_tools
@@ -51,9 +53,9 @@ lamboot
 
 ## Use Qiime extract_barcodes.py to remove the 8-mer barcodes that are at each end of the 
 ## merged sequences. 
-## extract_barcodes.py -f $OUT1DIR/MISEQ2367.assembled.fastq   \
-##  -o bar_exed -c barcode_paired_stitched -l 8 -L 8  \
-##  -m mapping.txt 
+extract_barcodes.py -f $OUT1DIR/MISEQ2367.assembled.fastq   \
+  -o bar_exed -c barcode_paired_stitched -l 8 -L 8  \
+  -m $OUT1DIR/mapping.txt 
 
 ## split_libraries_fastq: label sequences with sample ID based on index sequences. 
 split_libraries_fastq.py   \
@@ -61,7 +63,7 @@ split_libraries_fastq.py   \
    -b $OUT1DIR/bar_exed/barcodes.fastq -m $OUT1DIR/mapping.txt \
    --barcode_type 16 -q 29 -n 1 -o $OUT1DIR/labelled_hiqual 
 
-## Remove universal primers
+## Remove universal primers and amplicon primers
 cd $OUT1DIR/labelled_hiqual/
 python $TOOLDIR/trim_fasta_amplicons.py -i seqs.fna -o trimmed_seqs.fna
 
@@ -77,16 +79,11 @@ mkdir $OUT2DIR
 ## As I am using uSearch pipeline, need to "dereplicate" i.e. extract unique sequence set
 ## The input sequences to denoise2 must be a set of unique sequences sorted in order 
 ## of decreasing abundance with size annotations in the labels. 
+## File too large for usearch, so used vsearch equivalent
 ## Use all but 2 CPU cores
 nohup vsearch --derep_full $OUT1DIR/labelled_hiqual/trimmed_seqs_sampleID.fna  \
    --output $OUT2DIR/unique_w_sizesV.fasta --sizeout --threads $(( $(nproc)-2)) \
     > nohup_vsearch.out &
-
-## Pick Operational Taxonomic Units using uSearch  ####
-## Parameters:  97% similarity, usearch - replaced 30 Oct 2017
-
-# nohup usearch -cluster_otus $OUT2DIR/unique_w_sizesV.fasta -minsize 2  \
-#    -otus $OUT2DIR/otu_rep_set.fasta -relabel OTU > nohup_cluster_otus.out &
 
 #### Use usearch unoise2 (unoise3 not available in v9.2, which is what we have avail)
 #### Accept defaults of -minampsize 4 ,  -unoise_alpha 2.0
@@ -100,6 +97,7 @@ perl -pe '$_ =~s /(>Otu\d+)(;)(.*)/$1 $3/' $OUT2DIR/denoised.fasta  \
 ## Assign sequences to OTUs, with 99% cut-off. Ties, with equal identity %,  
 ## are assigned to the 1st match, which will be the largest matching OTU as 
 ## unique_w_sizesV.fasta was size-sorted large to small
+## File too large for usearch, so used vsearch equivalent
 
 vsearch --usearch_global $OUT1DIR/labelled_hiqual/trimmed_seqs_sampleID.fna  \
    --db $OUT2DIR/denoised_OTU_ID.fasta --strand plus --id 0.99  \

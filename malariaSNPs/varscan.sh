@@ -3,6 +3,8 @@
 ## Only VarScan native format output for now. 
 ## Jocelyn Sietsma Penington, October 2017
 
+## File-name format of sample bam files is <strainID>_S<sampleID>_nodup.bam
+
 PAPDIR=/wehisan/bioinf/bioinf-data/Papenfuss_lab/projects
 BASEDIR=$PAPDIR/malaria/cowman_lab/drug_resistance
 CURDIR=$BASEDIR/currentProject
