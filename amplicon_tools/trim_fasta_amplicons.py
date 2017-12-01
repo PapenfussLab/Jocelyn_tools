@@ -79,6 +79,7 @@ def trim_amplicons(in_name, out_name, **options_dict):
 	bothfound = 0
 	pre_length = Counter(); pre_trim = 0
 	post_length = Counter(); post_trim = 0
+	min_trimmed_length = 10  # Leave untrimmed any sequence that would become shorter than this 
 	out_fa = open(out_name, 'w')
 	
 	with open(in_name, 'r') as fasta:
@@ -120,18 +121,17 @@ def trim_amplicons(in_name, out_name, **options_dict):
 				if pf_find: 	# If forward primer is found, trim it and preceding bases
 					start = pf_find.end()
 				else:		# Otherwise, trim most common number of preceding bases
-					if len(seq) > (pre_trim + post_trim):  # don't trim very short sequences
-						start=pre_trim
-					else: start=0
+					start=pre_trim
 					
 				pr_find = re.search(primer2,seq)
 				if pr_find:		# If reverse primer is found, trim it and following bases
 					end = pr_find.start()
 				else:
-					if len(seq) > (pre_trim + post_trim):
-						end = len(seq) - post_trim - 1
-					else: end = len(seq) - 1
-				trimseq = seq[start:end]
+					end = len(seq) - post_trim - 1
+				
+				if end - start >= min_trimmed_length:
+					trimseq = seq[start:end]
+				else: trimseq = seq   # don't trim short sequences
 				if trimseq[-1] != '\n': trimseq = trimseq + '\n'
 				# write trimmed sequence and quality scores to the new file 
 				out_fa.write(seqheader)
