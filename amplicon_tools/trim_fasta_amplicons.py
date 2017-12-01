@@ -67,7 +67,7 @@ def trim_amplicons(in_name, out_name, **options_dict):
 	f805R = "GGACTAC.[ACG]GGGT[AT]TCTAAT"
 	f533F = "GTG[CT]CAGC[AC]GCCGCGGTAA"
 #	f341F_V3 = "CCTACGGG.GGC[AT]GCAG" # copied from mouse work, which used V3-V4
-	print "seqDirection:", options_dict['seqDirection'], " regionV:", options_dict['regionV']
+	print ("seqDirection:", options_dict['seqDirection'], " regionV:", options_dict['regionV'])
 	if (options_dict['regionV']=='V4'):
 		if options_dict['seqDirection'][0] in ['R', 'r']:
 			primer1 = re.compile(f805R, re.I)
@@ -75,7 +75,7 @@ def trim_amplicons(in_name, out_name, **options_dict):
 		else:
 			primer1 = re.compile(f533F, re.I)
 			primer2 = re.compile(rc(f805R), re.I)
-	print 'primer1:', primer1.pattern, ', primer2:', primer2.pattern
+	print ('primer1:', primer1.pattern, ', primer2:', primer2.pattern)
 	bothfound = 0
 	pre_length = Counter(); pre_trim = 0
 	post_length = Counter(); post_trim = 0
