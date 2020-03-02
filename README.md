@@ -15,3 +15,4 @@ Folder microbiome_plots has code fragments in R for drawing plots with phyloseq-
 
 mouse_microbiome_ASV.sh: mouse microbiome pipeline for making OTU table, as at Nov 2017. A blend of QIIME, Usearch and Vsearch tools
 
+CNVheatmaps.R: reads an inferCNV object and converts to tibbles in order to re-arrange the plot. March 2020
